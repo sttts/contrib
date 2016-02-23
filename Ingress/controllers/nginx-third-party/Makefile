@@ -5,7 +5,7 @@ TAG = 0.2
 PREFIX = aledbf/nginx-third-party
 
 controller: controller.go clean
-	CGO_ENABLED=0 GOOS=linux godep go build -a -installsuffix cgo -ldflags '-w' -o nginx-third-party-lb
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-w' -o nginx-third-party-lb
 
 container: controller
 	docker build -t $(PREFIX):$(TAG) .

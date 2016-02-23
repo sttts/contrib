@@ -234,7 +234,7 @@ http {
             access_by_lua_block {
                 require("ingress").content(ngx)
             }
-            proxy_pass http://$upstream_host:$upstream_port$request_uri;
+            proxy_pass https://$upstream_host:$upstream_port$request_uri;
         }
         
         {{ if $defErrorSvc }}{{ template "CUSTOM_ERRORS" (dict "cfg" $cfg "defErrorSvc" $defErrorSvc) }}{{ end }}

@@ -92,6 +92,11 @@ function _M.content(ngx)
 
     local address = backend.host
     ngx.var.upstream_port = backend.port or 80
+    if tonumber(ngx.var.upstream_port) == 80 then
+        ngx.var.upstream_scheme = "http"
+    else
+        ngx.var.upstream_scheme = "https"
+    end
 
     if dns_cache_options then
         local dns = cache.new(dns_cache_options)

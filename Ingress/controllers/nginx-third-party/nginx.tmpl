@@ -199,10 +199,11 @@ http {
         location / {
             set $upstream_host '';
             set $upstream_port '';
+            set $upstream_scheme 'https';
             access_by_lua_block {
                 require("ingress").content(ngx)
             }
-            proxy_pass http://$upstream_host:$upstream_port$request_uri;
+            proxy_pass $upstream_scheme://$upstream_host:$upstream_port$request_uri;
         }
 
         {{ if $defErrorSvc }}{{ template "CUSTOM_ERRORS" (dict "cfg" $cfg "defErrorSvc" $defErrorSvc) }}{{ end }}
@@ -223,6 +224,7 @@ http {
         location / {
             set $upstream_host '';
             set $upstream_port '';
+            set $upstream_scheme '';
 
             #ssl_certificate_by_lua '
             #    -- TODO: waiting release 0.9.20
@@ -234,7 +236,7 @@ http {
             access_by_lua_block {
                 require("ingress").content(ngx)
             }
-            proxy_pass https://$upstream_host:$upstream_port$request_uri;
+            proxy_pass $upstream_scheme://$upstream_host:$upstream_port$request_uri;
         }
         
         {{ if $defErrorSvc }}{{ template "CUSTOM_ERRORS" (dict "cfg" $cfg "defErrorSvc" $defErrorSvc) }}{{ end }}

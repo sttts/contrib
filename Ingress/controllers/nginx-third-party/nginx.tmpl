@@ -226,6 +226,37 @@ http {
             set $upstream_port '';
             set $upstream_scheme '';
 
+            # CORS settings
+            set $cors "";
+            if ($http_origin ~* ^(https://(.*\.)?kubermatic\.io|http://localhost:8000)(/.*)?$) {
+                set $cors "true";
+            }
+            if ($request_method = OPTIONS) {
+                set $cors "${cors}-options";
+            }
+            if ($request_method ~* (GET|POST|PUT|DELETE)) {
+                set $cors "${cors}-other";
+            }
+            if ($cors = true) {
+                add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+            }
+            if ($cors = true-other) {
+                add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+                add_header 'Access-Control-Allow-Credentials' 'true' always;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+                add_header 'Access-Control-Allow-Headers' 'Etag,Authorization,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+            }
+            if ($cors = true-options) {
+                add_header 'Access-Control-Allow-Origin' '$http_origin' always;
+                add_header 'Access-Control-Allow-Credentials' 'true' always;
+                add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+                add_header 'Access-Control-Allow-Headers' 'Etag,Authorization,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type' always;
+                add_header 'Access-Control-Max-Age' 1728000;
+                add_header 'Content-Type' 'text/plain charset=UTF-8';
+                add_header 'Content-Length' 0;
+                return 204;
+            }
+
             #ssl_certificate_by_lua '
             #    -- TODO: waiting release 0.9.20
             #    -- https://github.com/openresty/lua-nginx-module/pull/608#issuecomment-165255821
@@ -238,7 +269,7 @@ http {
             }
             proxy_pass $upstream_scheme://$upstream_host:$upstream_port$request_uri;
         }
-        
+
         {{ if $defErrorSvc }}{{ template "CUSTOM_ERRORS" (dict "cfg" $cfg "defErrorSvc" $defErrorSvc) }}{{ end }}
     }
     {{ end }}
